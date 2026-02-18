@@ -10,7 +10,7 @@ class WalletRepositoryImpl implements WalletRepository {
   @override
   Future<List<Wallet>> getWallets() async {
     try {
-      final response = await _apiClient.client.get('/wallets/wallets/');
+      final response = await _apiClient.client.get('/wallets/');
       final dynamic data = response.data;
       
       if (data is Map && data.containsKey('results')) {
@@ -37,7 +37,7 @@ class WalletRepositoryImpl implements WalletRepository {
     required String icon,
   }) async {
     try {
-      final response = await _apiClient.client.post('/wallets/wallets/', data: {
+      final response = await _apiClient.client.post('/wallets/', data: {
         'name': name,
         'type': type,
         'balance': balance,
@@ -53,7 +53,7 @@ class WalletRepositoryImpl implements WalletRepository {
   @override
   Future<void> deleteWallet(int id) async {
     try {
-      await _apiClient.client.delete('/wallets/wallets/$id/');
+      await _apiClient.client.delete('/wallets/$id/');
     } catch (e) {
       rethrow;
     }

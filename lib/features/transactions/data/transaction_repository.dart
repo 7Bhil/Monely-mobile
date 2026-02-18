@@ -10,7 +10,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<List<Transaction>> getTransactions() async {
     try {
-      final response = await _apiClient.client.get('/transactions/transactions/');
+      final response = await _apiClient.client.get('/transactions/');
       final dynamic data = response.data;
       
       if (data is Map && data.containsKey('results')) {
@@ -38,7 +38,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required DateTime date,
   }) async {
     try {
-      final response = await _apiClient.client.post('/transactions/transactions/', data: {
+      final response = await _apiClient.client.post('/transactions/', data: {
         'wallet': walletId,
         'receiver_wallet': receiverWalletId,
         'name': name,
@@ -55,7 +55,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<void> deleteTransaction(int id) async {
     try {
-      await _apiClient.client.delete('/transactions/transactions/$id/');
+      await _apiClient.client.delete('/transactions/$id/');
     } catch (e) {
       rethrow;
     }

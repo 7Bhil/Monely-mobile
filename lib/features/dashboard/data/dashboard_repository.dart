@@ -10,7 +10,7 @@ class DashboardRepository {
 
   Future<List<Wallet>> getWallets() async {
     try {
-      final response = await _apiClient.client.get('/wallets/wallets/');
+      final response = await _apiClient.client.get('/wallets/');
       final dynamic data = response.data;
       List<Wallet> wallets = [];
       
@@ -34,7 +34,7 @@ class DashboardRepository {
 
   Future<List<Transaction>> getRecentTransactions() async {
     try {
-      final response = await _apiClient.client.get('/transactions/transactions/');
+      final response = await _apiClient.client.get('/transactions/');
       final dynamic data = response.data;
       List<Transaction> transactions = [];
       
