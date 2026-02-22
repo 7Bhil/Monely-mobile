@@ -95,24 +95,36 @@ class _PinSetupPageState extends State<PinSetupPage> {
   }
 
   Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isPin = false}) {
-    return TextField(
-      controller: controller,
-      keyboardType: isPin ? TextInputType.number : TextInputType.text,
-      obscureText: isPin,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        prefixIcon: Icon(icon, color: Colors.white70),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: isPin ? TextInputType.number : TextInputType.text,
+          obscureText: isPin,
+          cursorColor: Colors.white,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withAlpha(25),
+            prefixIcon: Icon(icon, color: Colors.white),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.white30),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.white, width: 2),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

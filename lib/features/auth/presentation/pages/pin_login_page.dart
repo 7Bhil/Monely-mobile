@@ -60,6 +60,7 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   obscureText: true,
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
+                  cursorColor: Colors.white,
                   style: const TextStyle(color: Colors.white, fontSize: 32, letterSpacing: 16),
                   maxLength: 4,
                   onChanged: (value) {
@@ -70,10 +71,10 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   decoration: InputDecoration(
                     counterText: '',
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: _error != null ? Colors.red : Colors.white24),
+                      borderSide: BorderSide(color: _error != null ? Colors.red : Colors.white38, width: 2),
                     ),
                     focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF38BDF8)),
+                      borderSide: BorderSide(color: Color(0xFF38BDF8), width: 3),
                     ),
                   ),
                 ),

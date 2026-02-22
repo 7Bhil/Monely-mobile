@@ -7,6 +7,9 @@ class AuthRepository {
   final ApiClient _apiClient;
   final SharedPreferences _prefs;
   final LocalDataSource _localDataSource;
+  
+  // In-memory session flag (lost on app restart)
+  bool _isAuthenticated = false;
 
   AuthRepository(this._apiClient, this._prefs, this._localDataSource);
 
@@ -23,7 +26,7 @@ class AuthRepository {
     );
     await _localDataSource.cacheUserProfile(user);
     await _localDataSource.savePin(pin);
-    await _prefs.setBool('is_authenticated', true); // Session flag
+    _isAuthenticated = true; // Set current session as authenticated
     return user;
   }
 
@@ -31,7 +34,7 @@ class AuthRepository {
   bool verifyPin(String pin) {
     final isValid = _localDataSource.verifyPin(pin);
     if (isValid) {
-      _prefs.setBool('is_authenticated', true);
+      _isAuthenticated = true;
     }
     return isValid;
   }
@@ -55,16 +58,17 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    await _prefs.setBool('is_authenticated', false); // Lock the app
+    _isAuthenticated = false; // "Lock" the app session
   }
 
   // Entirely clear data (reset app)
   Future<void> resetApp() async {
     await _prefs.clear();
     await _localDataSource.clearCache();
+    _isAuthenticated = false;
   }
     
-  bool get isAuthenticated => _prefs.getBool('is_authenticated') ?? false;
+  bool get isAuthenticated => _isAuthenticated;
 
   User? get currentUser => _localDataSource.getCachedUserProfile();
 }
