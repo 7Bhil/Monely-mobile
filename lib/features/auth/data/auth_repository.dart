@@ -10,61 +10,61 @@ class AuthRepository {
 
   AuthRepository(this._apiClient, this._prefs, this._localDataSource);
 
-  Future<User> login(String email, String password) async {
-    try {
-      final response = await _apiClient.client.post('/auth/login/', data: {
-        'email': email, // Changed from username to email based on Django User model
-        'password': password,
-      });
-
-      final accessToken = response.data['access'];
-      final refreshToken = response.data['refresh'];
-
-      await _prefs.setString('access_token', accessToken);
-      await _prefs.setString('refresh_token', refreshToken);
-
-      return await getProfile();
-    } catch (e) {
-      rethrow;
-    }
+  // Setup initial profile with Name and PIN
+  Future<User> setupProfile(String name, String pin) async {
+    final user = User(
+      id: 1,
+      email: '', 
+      name: name,
+      username: name.toLowerCase().replaceAll(' ', '_'),
+      currency: 'USD',
+      language: 'fr',
+      monthlyIncome: 0,
+    );
+    await _localDataSource.cacheUserProfile(user);
+    await _localDataSource.savePin(pin);
+    await _prefs.setBool('is_authenticated', true); // Session flag
+    return user;
   }
 
-  Future<User> register(String name, String email, String password) async {
-    try {
-      await _apiClient.client.post('/auth/register/', data: {
-        'username': email.split('@')[0], // Generate username from email
-        'email': email,
-        'name': name,
-        'password': password,
-        'password_confirm': password,
-      });
-
-      return await login(email, password);
-    } catch (e) {
-      rethrow;
+  // Verify PIN for every connection
+  bool verifyPin(String pin) {
+    final isValid = _localDataSource.verifyPin(pin);
+    if (isValid) {
+      _prefs.setBool('is_authenticated', true);
     }
+    return isValid;
   }
+
+  // Check if it's the first time
+  bool get isFirstTime => !_localDataSource.hasPin();
 
   Future<User> getProfile() async {
-    try {
-      final response = await _apiClient.client.get('/auth/profile/');
-      final user = User.fromJson(response.data);
-      await _localDataSource.cacheUserProfile(user);
-      return user;
-    } catch (e) {
-      final cached = _localDataSource.getCachedUserProfile();
-      if (cached != null) return cached;
-      rethrow;
-    }
+    final cached = _localDataSource.getCachedUserProfile();
+    if (cached != null) return cached;
+    
+    return const User(
+      id: 1,
+      email: '',
+      name: 'Utilisateur Offline',
+      username: 'offline_user',
+      currency: 'USD',
+      language: 'fr',
+      monthlyIncome: 0,
+    );
   }
 
   Future<void> logout() async {
-    await _prefs.remove('access_token');
-    await _prefs.remove('refresh_token');
+    await _prefs.setBool('is_authenticated', false); // Lock the app
+  }
+
+  // Entirely clear data (reset app)
+  Future<void> resetApp() async {
+    await _prefs.clear();
     await _localDataSource.clearCache();
   }
     
-  bool get isAuthenticated => _prefs.containsKey('access_token');
+  bool get isAuthenticated => _prefs.getBool('is_authenticated') ?? false;
 
   User? get currentUser => _localDataSource.getCachedUserProfile();
 }

@@ -59,34 +59,28 @@ class SettingsPage extends StatelessWidget {
               _buildSection('Sécurité'),
               _buildSettingItem(Icons.lock_outline, 'Mot de passe', 'Changer votre mot de passe'),
               _buildSettingItem(Icons.fingerprint, 'Biométrie', 'Activer FaceID / Empreinte'),
-              const SizedBox(height: 32),
-              _buildSection('Application'),
-              _buildSettingItem(Icons.cloud_outlined, 'Serveur API', 'http://localhost:8000/api'),
-              _buildSettingItem(Icons.delete_sweep_outlined, 'Vider le cache', 'Réinitialiser les données locales', onTap: () async {
+              _buildSettingItem(Icons.lock_outline, 'Verrouiller', 'Nécessitera le code PIN', onTap: () async {
                 await sl<AuthRepository>().logout();
+                if (context.mounted) context.go('/pin-login');
               }),
-              _buildSettingItem(Icons.help_outline, 'Aide & Support', 'Besoin d\'assistance ?'),
+              _buildSettingItem(Icons.delete_forever_outlined, 'Réinitialiser', 'Effacer TOUTES les données', onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Tout effacer ?'),
+                    content: const Text('Cette action supprimera tous vos portefeuilles et transactions définitivement.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
+                      TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Effacer', style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await sl<AuthRepository>().resetApp();
+                  if (context.mounted) context.go('/setup-pin');
+                }
+              }),
               const SizedBox(height: 48),
-              ElevatedButton(
-                onPressed: () async {
-                  await sl<AuthRepository>().logout();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFEF2F2),
-                  foregroundColor: const Color(0xFFDC2626),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Déconnexion', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ],
-                ),
-              ),
               const SizedBox(height: 40),
               const Center(
                 child: Text(

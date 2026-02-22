@@ -117,8 +117,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     // 1. Try to load from cache first for instant UI
     try {
       final cachedUser = sl<LocalDataSource>().getCachedUserProfile();
-      final cachedWallets = sl<LocalDataSource>().getCachedWallets();
-      final cachedTransactions = sl<LocalDataSource>().getCachedTransactions();
+      final cachedWallets = await sl<LocalDataSource>().getWallets();
+      final cachedTransactions = await sl<LocalDataSource>().getTransactions();
 
       if (cachedUser != null) {
         emit(DashboardLoaded(

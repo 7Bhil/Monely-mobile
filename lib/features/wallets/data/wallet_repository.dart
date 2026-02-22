@@ -1,30 +1,15 @@
-import '../../../../core/api/api_client.dart';
+import '../../../../core/data/local_data_source.dart';
 import '../../dashboard/domain/models.dart';
 import '../domain/wallet_repository.dart';
 
 class WalletRepositoryImpl implements WalletRepository {
-  final ApiClient _apiClient;
+  final LocalDataSource _localDataSource;
 
-  WalletRepositoryImpl(this._apiClient);
+  WalletRepositoryImpl(this._localDataSource);
 
   @override
   Future<List<Wallet>> getWallets() async {
-    try {
-      final response = await _apiClient.client.get('/wallets/');
-      final dynamic data = response.data;
-      
-      if (data is Map && data.containsKey('results')) {
-         final results = data['results'];
-         if (results is List) {
-           return results.map((json) => Wallet.fromJson(json)).toList();
-         }
-      } else if (data is List) {
-         return data.map((json) => Wallet.fromJson(json)).toList();
-      }
-      return [];
-    } catch (e) {
-      rethrow;
-    }
+    return _localDataSource.getWallets();
   }
 
   @override
@@ -36,26 +21,21 @@ class WalletRepositoryImpl implements WalletRepository {
     required String color,
     required String icon,
   }) async {
-    try {
-      final response = await _apiClient.client.post('/wallets/', data: {
-        'name': name,
-        'type': type,
-        'balance': balance,
-        'currency': currency,
-        'color': color,
-        'icon': icon,
-      });
-      return Wallet.fromJson(response.data);
-    } catch (e) {
-      rethrow;
-    }
+    final wallet = Wallet(
+      id: 0, // Sera généré par LocalDataSource
+      name: name,
+      type: type,
+      typeDisplay: type,
+      balance: balance,
+      currency: currency,
+      color: color,
+      icon: icon,
+    );
+    return _localDataSource.saveWallet(wallet);
   }
+
   @override
   Future<void> deleteWallet(int id) async {
-    try {
-      await _apiClient.client.delete('/wallets/$id/');
-    } catch (e) {
-      rethrow;
-    }
+    await _localDataSource.deleteWallet(id);
   }
 }

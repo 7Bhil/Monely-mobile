@@ -1,30 +1,15 @@
-import '../../../../core/api/api_client.dart';
+import '../../../../core/data/local_data_source.dart';
 import '../../dashboard/domain/models.dart';
 import '../domain/transaction_repository.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
-  final ApiClient _apiClient;
+  final LocalDataSource _localDataSource;
 
-  TransactionRepositoryImpl(this._apiClient);
+  TransactionRepositoryImpl(this._localDataSource);
 
   @override
   Future<List<Transaction>> getTransactions() async {
-    try {
-      final response = await _apiClient.client.get('/transactions/');
-      final dynamic data = response.data;
-      
-      if (data is Map && data.containsKey('results')) {
-         final results = data['results'];
-         if (results is List) {
-           return results.map((json) => Transaction.fromJson(json)).toList();
-         }
-      } else if (data is List) {
-         return data.map((json) => Transaction.fromJson(json)).toList();
-      }
-      return [];
-    } catch (e) {
-      rethrow;
-    }
+    return _localDataSource.getTransactions();
   }
 
   @override
@@ -37,27 +22,38 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required String category,
     required DateTime date,
   }) async {
-    try {
-      final response = await _apiClient.client.post('/transactions/', data: {
-        'wallet': walletId,
-        'receiver_wallet': receiverWalletId,
-        'name': name,
-        'amount': amount,
-        'type': type,
-        'category': category,
-        'date': date.toIso8601String().split('T')[0],
-      });
-      return Transaction.fromJson(response.data);
-    } catch (e) {
-      rethrow;
-    }
+    final transaction = Transaction(
+      id: 0, // Sera généré par LocalDataSource
+      walletId: walletId,
+      receiverWalletId: receiverWalletId,
+      walletName: '', // Sera rempli par LocalDataSource au chargement
+      name: name,
+      amount: amount,
+      category: category,
+      type: type,
+      typeDisplay: type,
+      status: 'COMPLETED',
+      statusDisplay: 'Confirmé',
+      date: date,
+      icon: _getIconForCategory(category),
+    );
+    return _localDataSource.saveTransaction(transaction);
   }
+
   @override
   Future<void> deleteTransaction(int id) async {
-    try {
-      await _apiClient.client.delete('/transactions/$id/');
-    } catch (e) {
-      rethrow;
+    await _localDataSource.deleteTransaction(id);
+  }
+
+  String _getIconForCategory(String category) {
+    // Logique simple pour les icônes
+    switch (category.toLowerCase()) {
+      case 'food': return 'restaurant';
+      case 'shopping': return 'shopping_bag';
+      case 'transport': return 'directions_car';
+      case 'entertainment': return 'movie';
+      case 'health': return 'medical_services';
+      default: return 'attach_money';
     }
   }
 }

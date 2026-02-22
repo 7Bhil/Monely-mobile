@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/dashboard/data/dashboard_repository.dart';
@@ -18,9 +19,19 @@ final sl = GetIt.instance;
 Future<void> init() async {
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
+  
+  // Hive Boxes
+  final userBox = await Hive.openBox('userBox');
+  final walletsBox = await Hive.openBox('walletsBox');
+  final transactionsBox = await Hive.openBox('transactionsBox');
+
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => ApiClient());
-  sl.registerLazySingleton(() => LocalDataSource(sl()));
+  sl.registerLazySingleton(() => LocalDataSource(
+    userBox: userBox, 
+    walletsBox: walletsBox, 
+    transactionsBox: transactionsBox,
+  ));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

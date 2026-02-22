@@ -11,14 +11,11 @@ abstract class AuthEvent extends Equatable {
 
 class AuthCheckRequested extends AuthEvent {}
 
-class AuthLoginRequested extends AuthEvent {
-  final String email;
-  final String password;
-
-  AuthLoginRequested(this.email, this.password);
-
+class AuthPinVerified extends AuthEvent {
+  final User user;
+  AuthPinVerified(this.user);
   @override
-  List<Object?> get props => [email, password];
+  List<Object?> get props => [user];
 }
 
 class AuthLogoutRequested extends AuthEvent {}
@@ -35,9 +32,7 @@ class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
   final User user;
-
   AuthAuthenticated(this.user);
-
   @override
   List<Object?> get props => [user];
 }
@@ -46,9 +41,7 @@ class AuthUnauthenticated extends AuthState {}
 
 class AuthFailure extends AuthState {
   final String message;
-
   AuthFailure(this.message);
-
   @override
   List<Object?> get props => [message];
 }
@@ -59,7 +52,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc(this._authRepository) : super(AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
-    on<AuthLoginRequested>(_onAuthLoginRequested);
+    on<AuthPinVerified>(_onAuthPinVerified);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
   }
 
@@ -79,17 +72,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthLoginRequested(
-    AuthLoginRequested event,
+  void _onAuthPinVerified(
+    AuthPinVerified event,
     Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-    try {
-      final user = await _authRepository.login(event.email, event.password);
-      emit(AuthAuthenticated(user));
-    } catch (e) {
-      emit(AuthFailure(e.toString()));
-    }
+  ) {
+    emit(AuthAuthenticated(event.user));
   }
 
   Future<void> _onAuthLogoutRequested(

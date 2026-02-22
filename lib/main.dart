@@ -5,9 +5,11 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'core/di/injection_container.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
   await di.init();
   runApp(const MyApp());
 }

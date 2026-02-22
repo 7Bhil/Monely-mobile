@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/pin_setup_page.dart';
+import '../../features/auth/presentation/pages/pin_login_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/analytics/presentation/pages/analytics_page.dart';
 import '../../features/wallets/presentation/pages/wallets_page.dart';
@@ -16,13 +17,26 @@ import '../presentation/pages/splash_page.dart';
 final appRouter = GoRouter(
   initialLocation: '/splash',
   redirect: (context, state) {
-    final isAuthenticated = sl<AuthRepository>().isAuthenticated;
-    if (!isAuthenticated && state.uri.toString() != '/login') {
-      return '/login';
+    final authRepo = sl<AuthRepository>();
+    final isFirstTime = authRepo.isFirstTime;
+    final isAuthenticated = authRepo.isAuthenticated;
+
+    if (state.uri.toString() == '/splash') return null;
+
+    if (isFirstTime) {
+      if (state.uri.toString() != '/setup-pin') return '/setup-pin';
+      return null;
     }
-    if (isAuthenticated && state.uri.toString() == '/login') {
+
+    if (!isAuthenticated) {
+      if (state.uri.toString() != '/pin-login') return '/pin-login';
+      return null;
+    }
+
+    if (isAuthenticated && state.uri.toString() == '/pin-login') {
       return '/';
     }
+
     return null;
   },
   routes: [
@@ -31,8 +45,12 @@ final appRouter = GoRouter(
       builder: (context, state) => const SplashPage(),
     ),
     GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginPage(),
+      path: '/setup-pin',
+      builder: (context, state) => const PinSetupPage(),
+    ),
+    GoRoute(
+      path: '/pin-login',
+      builder: (context, state) => const PinLoginPage(),
     ),
     ShellRoute(
       builder: (context, state, child) => MainContainer(child: child),
